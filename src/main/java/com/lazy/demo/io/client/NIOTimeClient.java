@@ -7,8 +7,9 @@ package com.lazy.demo.io.client;
  *
  * @author laizhiyuan
  * @since 2020/2/16.
+ * {@link com.lazy.demo.io.server.NIOTimeServer}
  */
-public class NIOTimerClient {
+public class NIOTimeClient {
 
 
     public static void main(String[] args) {
