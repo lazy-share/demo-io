@@ -1,12 +1,14 @@
 package com.lazy.demo.io.server;
 
+import com.lazy.demo.io.codec.MessagePackDecoder;
+import com.lazy.demo.io.codec.MessagePackEncoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.LineBasedFrameDecoder;
-import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
@@ -17,17 +19,15 @@ import io.netty.handler.logging.LoggingHandler;
  *
  * @author laizhiyuan
  * @since 2020/2/18.
- * {@link com.lazy.demo.io.client.NettyTimeClient}
  */
-public class NettyTimeServer {
+public class NettyEchoServer {
 
 
     public static void main(String[] args) throws InterruptedException {
-
         // Configure the server.
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
-        final NettyTimeServerHandler serverHandler = new NettyTimeServerHandler();
+        final NettyEchoServerHandler serverHandler = new NettyEchoServerHandler();
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
@@ -39,10 +39,11 @@ public class NettyTimeServer {
                         public void initChannel(SocketChannel ch) throws Exception {
                             ChannelPipeline p = ch.pipeline();
 
-                            p.addLast(new LoggingHandler(LogLevel.INFO));
-                            //LineBasedFrameDecoder + StringDecoder = 通过换行符解决TCP粘包、半包文本解析器组合
-//                            p.addLast(new LineBasedFrameDecoder(1));
-//                            p.addLast(new StringDecoder());
+//                            p.addLast(new LoggingHandler(LogLevel.ERROR));
+                            p.addLast("LengthFieldBasedFrameDecoder", new LengthFieldBasedFrameDecoder(65535, 0, 2, 0, 2));
+                            p.addLast("messagePack decoder", new MessagePackDecoder());
+                            p.addLast("LengthFieldPrepender", new LengthFieldPrepender(2));
+                            p.addLast("messagePack encoder", new MessagePackEncoder());
                             p.addLast(serverHandler);
                         }
                     });
