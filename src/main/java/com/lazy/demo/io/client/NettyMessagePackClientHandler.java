@@ -12,7 +12,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
  * @author laizhiyuan
  * @since 2020/2/18.
  */
-public class NettyEchoClientHandler extends ChannelInboundHandlerAdapter {
+public class NettyMessagePackClientHandler extends ChannelInboundHandlerAdapter {
 
 
     @Override

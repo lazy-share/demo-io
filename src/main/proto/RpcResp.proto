@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+package proto;
+
+import "OrderMain.proto";
+option java_package = "com.lazy.demo.io.pojo";
+option java_outer_classname = "RpcRespProto";
+
+message RpcResp {
+  required string code = 1;
+  required string msg = 2;
+  required OrderMain body = 3;
+}

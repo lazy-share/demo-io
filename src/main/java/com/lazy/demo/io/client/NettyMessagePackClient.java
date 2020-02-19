@@ -1,16 +1,14 @@
-package com.lazy.demo.io.server;
+package com.lazy.demo.io.client;
 
 import com.lazy.demo.io.codec.MessagePackDecoder;
 import com.lazy.demo.io.codec.MessagePackEncoder;
-import io.netty.bootstrap.ServerBootstrap;
+import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 
 /**
  * <p>
@@ -20,43 +18,43 @@ import io.netty.handler.logging.LoggingHandler;
  * @author laizhiyuan
  * @since 2020/2/18.
  */
-public class NettyEchoServer {
+public class NettyMessagePackClient {
 
 
     public static void main(String[] args) throws InterruptedException {
-        // Configure the server.
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        final NettyEchoServerHandler serverHandler = new NettyEchoServerHandler();
+
+        // Configure the client.
+        EventLoopGroup group = new NioEventLoopGroup();
         try {
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .option(ChannelOption.SO_BACKLOG, 100)
-                    .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
+            Bootstrap b = new Bootstrap();
+            b.group(group)
+                    .channel(NioSocketChannel.class)
+                    .option(ChannelOption.TCP_NODELAY, true)
+                    .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
                             ChannelPipeline p = ch.pipeline();
 
 //                            p.addLast(new LoggingHandler(LogLevel.ERROR));
+                            //消息长度（解决TCP粘包、半包） + MessagePack（字节编解码） 组合
                             p.addLast("LengthFieldBasedFrameDecoder", new LengthFieldBasedFrameDecoder(65535, 0, 2, 0, 2));
                             p.addLast("messagePack decoder", new MessagePackDecoder());
                             p.addLast("LengthFieldPrepender", new LengthFieldPrepender(2));
                             p.addLast("messagePack encoder", new MessagePackEncoder());
-                            p.addLast(serverHandler);
+                            p.addLast(new NettyMessagePackClientHandler());
                         }
                     });
 
-            // Start the server.
-            ChannelFuture f = b.bind(8088).sync();
+            // Start the client.
+            ChannelFuture f = b.connect("localhost", 8088).sync();
 
-            // Wait until the server socket is closed.
+            // Wait until the connection is closed.
             f.channel().closeFuture().sync();
         } finally {
-            // Shut down all event loops to terminate all threads.
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
+            // Shut down the event loop to terminate all threads.
+            group.shutdownGracefully();
         }
     }
+
 }
+

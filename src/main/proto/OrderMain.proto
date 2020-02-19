@@ -1,0 +1,36 @@
+syntax = "proto2";
+
+package proto;
+option java_package = "com.lazy.demo.io.pojo";
+option java_outer_classname = "OrderMainProto";
+
+message OrderMain {
+   required int64 id = 1;
+   required double payMoney = 2;
+   required string customerName = 3;
+   required string customerNo = 4;
+   repeated string reserve = 5;
+   repeated OrderDetail orderDetail = 6;
+   optional Address address = 7;
+
+ }
+
+ message Address {
+     required string province = 1;
+     required string city = 2;
+     required string county = 3;
+     required string street = 4;
+
+     optional string provinceName = 5;
+     optional string cityName = 6;
+     optional string countyName = 7;
+     optional string streetName = 8;
+ }
+
+ message OrderDetail {
+     required int64 id = 1;
+     required string sku = 2;
+     required double unitPrice = 3;
+     required int32 buyNum = 4;
+     required string goodsName = 5;
+ }
