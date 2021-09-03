@@ -5,6 +5,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.FixedLengthFrameDecoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
@@ -21,7 +22,7 @@ public class NettyTimeClient {
 
     public static void main(String[] args) throws InterruptedException {
 
-// Configure the client.
+        // Configure the client.
         EventLoopGroup group = new NioEventLoopGroup();
         try {
             Bootstrap b = new Bootstrap();
@@ -32,8 +33,8 @@ public class NettyTimeClient {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
                             ChannelPipeline p = ch.pipeline();
-
-                            p.addLast(new LoggingHandler(LogLevel.INFO));
+                            //处理tcp粘包/拆包处理器，固定长度方式
+                            p.addLast(new FixedLengthFrameDecoder("param error".getBytes().length));
                             p.addLast(new NettyTimeClientHandler());
                         }
                     });

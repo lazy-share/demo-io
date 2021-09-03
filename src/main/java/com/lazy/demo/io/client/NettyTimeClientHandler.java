@@ -19,9 +19,15 @@ public class NettyTimeClientHandler extends ChannelInboundHandlerAdapter {
     private final ByteBuf firstMessage;
 
     public NettyTimeClientHandler() {
-        byte[] bytes = "get time".getBytes();
+
+
+        byte[] bytes = new byte[256];
         firstMessage = Unpooled.buffer(bytes.length);
-        firstMessage.writeBytes(bytes);
+
+        //固定启动后往服务端写20次数据包，每隔数据包大小固定为256个字节长度
+        for (int i = 0; i < 20; i++) {
+            firstMessage.writeBytes(bytes);
+        }
     }
 
     @Override

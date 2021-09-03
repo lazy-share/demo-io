@@ -5,6 +5,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.FixedLengthFrameDecoder;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.logging.LogLevel;
@@ -33,16 +34,12 @@ public class NettyTimeServer {
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.SO_BACKLOG, 100)
-                    .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
                             ChannelPipeline p = ch.pipeline();
 
-                            p.addLast(new LoggingHandler(LogLevel.INFO));
-                            //LineBasedFrameDecoder + StringDecoder = 通过换行符解决TCP粘包、半包文本解析器组合
-//                            p.addLast(new LineBasedFrameDecoder(1));
-//                            p.addLast(new StringDecoder());
+//                            p.addLast(new FixedLengthFrameDecoder(254));
                             p.addLast(serverHandler);
                         }
                     });
